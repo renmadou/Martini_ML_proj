@@ -133,7 +133,7 @@ Positional:
 Options:
 
 - `--no-xtb`  
-  Skip xTB coordinate/CG generation.
+  Skip xTB coordinate/CG generation. Bonded parameters fall back to fixed defaults (uniform bond length and force constant, no angle/dihedral terms); see [xTB vs no-xTB output comparison](Benzene_comparison.md). Recommended only for quick topology checks, not for production simulations.
 
 - `--no-files`  
   Do not write output files (`.txt/.gro/.itp`). Useful for “library mode” and tests.
@@ -192,6 +192,8 @@ If xTB isn’t available on your machine or you want a quick run, use:
 ```bash
 python -m martini_mapper NAME SMILES --no-xtb
 ```
+
+Note that `--no-xtb` only guarantees correct topology: bonds use uniform default parameters and no angle/dihedral terms are generated. For complex molecules, the default xTB mode is strongly recommended — see [Benzene_comparison.md](Benzene_comparison.md) for a detailed comparison and the rationale.
 
 ---
 
