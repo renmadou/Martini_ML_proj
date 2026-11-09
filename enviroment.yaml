@@ -1,4 +1,4 @@
-name: CG
+name: molcluster
 channels:
   - defaults
   - https://conda.software.inl.gov/public
@@ -124,6 +124,10 @@ dependencies:
   - zlib=1.2.13=hd590300_5
   - zstd=1.5.5=hc292b87_0
   - pip:
+      # torch 2.1.2 (cu121) 及 torch-scatter/sparse/cluster/spline-conv 的 +pt21cu121 轮子
+      # 不在 PyPI 默认索引上，必须显式指定以下源，否则 pip 解析失败导致整个 pip 阶段回滚
+      - --extra-index-url https://download.pytorch.org/whl/cu121
+      - --find-links https://data.pyg.org/whl/torch-2.1.2+cu121.html
       - absl-py==2.0.0
       - attrs==23.1.0
       - backports-tarfile==1.2.0
