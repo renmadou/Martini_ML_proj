@@ -15,8 +15,18 @@ CKPT = 'script/model.pth'                       # 自带的 checkpoint
 SMILES_FILE = 'data/minimal_test.smi'           # 最小测试集
 SMARTS_FILE = 'data/martini2_vocab-2.txt'  # 预定义官能团 SMARTS 文件；不需要可改成 None
 
-device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
-ckpt = torch.load(CKPT, map_location='cpu')
+def get_device():
+    if torch.cuda.is_available():
+        major, minor = torch.cuda.get_device_capability(0)
+        supported = {int(a.split('_')[1]) for a in torch.cuda.get_arch_list() if a.startswith('sm_')}
+        if major * 10 + minor in supported:
+            return torch.device('cuda:0')
+        print(f'WARNING: GPU sm_{major}{minor} not supported by this PyTorch build'
+              f' (supports {sorted(supported)}), falling back to CPU.')
+    return torch.device('cpu')
+
+device = get_device()
+ckpt = torch.load(CKPT, map_location='cpu', weights_only=False)  # 自有 checkpoint，含 args 命名空间
 args = ckpt['args']
 edge_method = args.edge_method
 if args.edge_method in ['bonded+nonbonded', 'nonbonded']:
