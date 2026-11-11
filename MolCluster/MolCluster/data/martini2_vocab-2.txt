@@ -1,0 +1,16 @@
+SMARTS name
+c1ccccc1 benzene_ring
+c1cc[nH]c1 pyrrole_ring
+c1ccncc1 pyridine_ring
+[CX4][OX2H1] alcohol
+[CX4][SX2H1] thiol
+[CX3](=O)[OX2H1] carboxylic_acid
+[CX3](=O)[OX2][CX4] ester
+[CX3](=O)[NX3] amide
+[CX3](=O)[CX4] ketone
+[CX4][OX2][CX4] ether
+[NX3;H1,H2][CX4] amine
+[CX2]#[NX1] nitrile
+[FX,ClX,BrX,IX][cX3] aryl_halide
+[CX4][CX4][CX4][CX4] alkyl_4carbon
+[OX2H1][CX4][CX4][OX2H1] diol
