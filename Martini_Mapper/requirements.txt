@@ -1,0 +1,7 @@
+numpy
+rdkit
+mdtraj
+xtb
+setuptools
+wheel
+pytest
