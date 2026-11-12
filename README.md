@@ -40,3 +40,4 @@ cat benchmarks/demo_comparison.md
 - `docs/Week1_baseline_memo.md` — 第 1 周基线备忘录（环境、失败分支、γ 摸底结论、第 2 周前置条件）
 - `docs/Benzene_comparison.md` — 苯：两工具并排对比 + xtb/--no-xtb 差异
 - `benchmarks/Benzene_gamma_sweep.csv` — MolCluster 苯上 γ→N_groups 响应与二分搜索记录
+- `docs/Martini-ML_Plan_EN.html` — 项目总体研究计划：粗粒化超分子组装中界面能与手性识别的保真度审计（多周路线图）

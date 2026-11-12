@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Martini-ML Fidelity Audit: Interfacial Energy and Chiral Recognition in Coarse-Grained Supramolecular Assembly</title>
+<style>
+  @page { size: A4; margin: 20mm 18mm; }
+  body { font-family: "Georgia","Times New Roman","Noto Serif",serif;
+         font-size: 10.5pt; line-height: 1.6; color:#1a1a1a; max-width: 170mm; margin:auto; }
+  h1 { font-size: 17pt; border-bottom: 2px solid #333; padding-bottom: 6px; margin-top: 0; }
+  h2 { font-size: 13pt; margin-top: 1.6em; border-left: 4px solid #555; padding-left: 8px; }
+  h3 { font-size: 11pt; margin-top: 1.2em; color:#222; }
+  table { border-collapse: collapse; width: 100%; margin: 10px 0; font-size: 9.5pt; }
+  th, td { border: 1px solid #999; padding: 5px 7px; vertical-align: top; }
+  th { background: #eee; }
+  code { font-family: "Consolas","Courier New",monospace; background:#f3f3f3; padding:1px 4px; border-radius:3px; font-size:9.5pt; }
+  blockquote { border-left: 3px solid #bbb; margin-left:0; padding-left:12px; color:#444; }
+  .milestone { background:#f7f7f7; border:1px solid #ccc; padding:8px 12px; margin:10px 0; }
+  ul, ol { padding-left: 1.6em; }
+  li { margin: 3px 0; }
+</style>
+</head>
+<body>
+
+<h1>Project Name: Martini-ML Fidelity Audit<br><span style="font-size:13pt;font-weight:normal;">— Interfacial Energy and Chiral Recognition in Coarse-Grained Supramolecular Assembly</span></h1>
+
+<blockquote>6-month cycle · “Two-Legged” strategy · Anchored in Prof. Yan Yun’s SPMSA / host–guest / coordination-chirality systems</blockquote>
+
+<h2>1. Why Anchor to Prof. Yan Yun’s Work</h2>
+<p>Prof. Yan Yun’s team published in <em>J. Phys. Chem. B</em> in 2022 a work that already used the <strong>Martini force field for coarse-grained simulation of the solid-phase molecular self-assembly (SPMSA) of SDS</strong>, revealing the effect of surfactant chain length on ordered bilayer assembly. This provides a ready starting point for “Leg 1”: Martini modeling of SPMSA has precedent, but that work used conventional manual mapping and existing parameters; it did not involve the new chemical space of Martini 3, nor any ML-based mapping or inverse-design tool.</p>
+<p>Meanwhile, Prof. Yan’s team used DFT in <strong>folate–metal-ion chirality inversion</strong> to reveal how coordination conformation determines the chirality direction of tetramer stacking, and studied dynamic assembly for precise control of supramolecular chirality in <strong>cyclodextrin host–guest</strong> systems. The common feature of these systems is that <strong>the driving forces for assembly come from interfacial energy, coordination conformation, or host–guest inclusion, rather than simple hydrophobic collapse</strong>—exactly where coarse-grained mapping is most likely to lose information.</p>
+<p><strong>The breakthrough question of this project</strong>: When Martini 3 parameterization extends to SPMSA precursors (e.g., folate, cyclodextrin derivatives, metal-coordinating small molecules), can learning-driven mapping such as MolCluster better preserve the “key bead features” that drive assembly than the rule-based Martini Mapper? Can juniper inverse generation recover all-atom candidates with correct coordination/inclusion geometry from coarse-grained beads?</p>
+
+<h2>2. Concrete Embodiments of the Two Legs (Aligned with Prof. Yan’s Systems)</h2>
+<h3>Leg 1 (Parameterization Expansion)</h3>
+<p>Rather than covering the entire Metabolome, we focus on <strong>three classes of “mapping-difficult” molecules</strong> in Prof. Yan’s systems:</p>
+<ul>
+  <li><strong>SPMSA precursors</strong>: SDS already has Martini precedent, but <strong>folate</strong> (multiple carboxylates, pterin ring, dense coordination sites) has not been reported in Martini 3 parameterization and can serve as the stress-test molecule for Leg 1;</li>
+  <li><strong>Cyclodextrin derivatives</strong>: The cavity size and host–guest chemistry of α-/β-CD require bead-level retention of the inner-hydrophobic/outer-hydrophilic topology; existing Martini sugar beads may not directly express inclusion selectivity;</li>
+  <li><strong>Metal coordination nodes</strong>: Whether the Folate–Zn²⁺/Cu²⁺ coordination-conformation inversion (revealed by DFT) can still be distinguished after coarse-graining is a hard metric for whether Leg 1 parameterization is sufficiently fine.</li>
+</ul>
+<h3>Leg 2 (ML Tools)</h3>
+<p>The roles of the three tools need to be repositioned for supramolecular systems:</p>
+<ul>
+  <li><strong>MolCluster</strong>: Answers whether learning-driven mapping better retains coordination/inclusion-related functional-group topology than Martini Mapper;</li>
+  <li><strong>juniper</strong>: Answers whether coarse-grained beads can inverse-generate all-atom molecules with correct coordination geometry or host–guest complementarity—<strong>this is a reversibility test of the information fidelity of coarse-grained mapping</strong>;</li>
+  <li><strong>Martini3-NMR</strong>: May not be applicable in these systems (NMR data may not be available). Instead, <strong>DFT-optimized structures or published crystal/assembly structures are used as “atomic-level references”</strong> to test whether coarse-grained simulations retain the key contact modes that drive assembly.</li>
+</ul>
+
+<h2>3. Six-Month Timeline and Milestones</h2>
+
+<h3>Months 1–2: Build a “Supramolecular Mapping Divergence Map”</h3>
+<p><strong>Task A (Leg 1)</strong>: Select <strong>folate</strong> (SPMSA precursor, dense coordination), the <strong>α-CD/BPDC host–guest pair</strong> (a transient self-assembly system reported by Prof. Yan’s team), and <strong>a Folate–M²⁺ coordination fragment</strong>. Use Martini Mapper to generate Martini 3 topologies from SMILES/structures, and record the failure rate and the types of functional groups requiring manual intervention.</p>
+<p><strong>Task B (Leg 2)</strong>: Run MolCluster on the same molecule set to generate learning-driven coarse-grained groupings, and compare them molecule by molecule with Martini Mapper in terms of bead number, <strong>functional-group retention</strong> (especially carboxyl, pterin ring, glycosidic oxygen), and <strong>whether bead types incapable of expressing coordination direction are produced</strong>.</p>
+<div class="milestone"><strong>Milestone M1</strong>: Produce a <strong>“Mapping Divergence Table for Supramolecular-Assembly-Related Functional Groups.”</strong> The key output is not an overall agreement rate, but <strong>“which assembly-driving functional groups are treated differently under the two mappings”</strong>—for example, Martini Mapper may merge multiple folate carboxylates into one negatively charged bead, whereas MolCluster may preserve their spatial separability. This divergence table is the basis for selecting subsequent simulation tests.</div>
+
+<h3>Months 3–4: “Fidelity Stress Test” of Coarse-Grained Simulations</h3>
+<p><strong>Task C (core of the closed loop)</strong>: Select <strong>the 2–3 most divergent systems</strong> from M1 for Martini 3 simulations:</p>
+<ul>
+  <li><strong>SPMSA precursor compression/fusion simulation</strong>: Refer to the SDS coarse-grained scheme established by Prof. Yan’s team, and test whether the interfacial-energy-driven fusion behavior of folate-based precursors is sensitive to the mapping method;</li>
+  <li><strong>CD host–guest inclusion simulation</strong>: Compare the inclusion free energy or residence time of α-CD with BPDC under the two mappings, and test whether coarse-graining retains host–guest selectivity;</li>
+  <li><strong>Folate–M²⁺ coordination fragment simulation</strong>: Use DFT-optimized structures as references, and test whether metal–carboxylate contact patterns in coarse-grained simulations can still distinguish Zn-type from Cu-type conformational differences.</li>
+</ul>
+<p><strong>Task D (juniper inverse test)</strong>: For the “key bead combinations” emerging from Task C (e.g., bead connection patterns related to metal coordination, bead arrangements at the CD cavity entrance), use juniper for conditional inverse generation, and check whether the generated molecules <strong>return to chemical structures with the correct coordination number or host–guest complementary geometry</strong>. juniper has reported 93% validity on simple two-bead targets, but <strong>its inverse recoverability in coordination/inclusion scenarios is completely unknown</strong>—this is the sharpest breakthrough test of the project.</p>
+<div class="milestone"><strong>Milestone M2</strong>: Obtain a <strong>three-part diagnostic map of “mapping method–simulation behavior–inverse recoverability.”</strong> If MolCluster significantly outperforms Martini Mapper’s failure cases on coordination/inclusion functional groups, learning-driven mapping gains incremental evidence in supramolecular assembly scenarios; if juniper’s recovery rate drops sharply on metal-coordination bead combinations, it directly exposes <strong>the domain shift between the training distribution of current generative inverse-design tools and the coordination chemistry space</strong>.</div>
+
+<h3>Months 5–6: Minimal Repair and Deliverables</h3>
+<p><strong>Task E (targeted repair of a single breakpoint from M2)</strong>:</p>
+<ul>
+  <li>If MolCluster groups carboxyl/glycosidic oxygen unreasonably → use <strong>coordination/hydrogen-bond distance constraints</strong> extracted from DFT-optimized structures of folate/CD to construct a small number of anchored samples and fine-tune MolCluster’s predefined-group loss;</li>
+  <li>If juniper shows low recovery on coordination bead combinations → augment the conditional-generation training set with “coordination bead–all-atom coordination fragment” pairs generated in Task C, and perform lightweight fine-tuning;</li>
+  <li>If Martini Mapper systematically fails on the pterin ring or glycosidic bonds → add fragment rules for that functional group to its bead dictionary.</li>
+</ul>
+<p><strong>We do not pursue comprehensive repair</strong>; we only seek to prove that <strong>the diagnostic chain “from the functional requirements of supramolecular assembly to the precision requirements of coarse-grained mapping” is feasible</strong>.</p>
+<p><strong>Deliverables</strong>:</p>
+<ul>
+  <li>A <strong>Martini 3 mapping-fidelity SOP for supramolecular assembly systems</strong>, explicitly marking which functional groups/assembly driving forces are reliable under existing mappings, which must rely on learning-driven mapping, and which still require atomic-level correction;</li>
+  <li>A <strong>benchmark dataset</strong> containing dual-mapping topologies for folate/CD host–guest/coordination fragments, simulation trajectory summaries, juniper inverse-generation results, and DFT reference structures;</li>
+  <li>A paper draft themed <strong>“Does coarse-grained mapping retain the chemical information of supramolecular assembly?”</strong>, giving equal weight to positive results and failure diagnostics.</li>
+</ul>
+
+<h2>4. Feasibility Basis and Risk Contingency</h2>
+<p><strong>Feasibility</strong>: Prof. Yan’s team has already used Martini coarse-grained simulations for SDS SPMSA, demonstrating technical compatibility between the system and the Martini framework; Martini Mapper, MolCluster, and juniper are all open-source tools; DFT reference structures can be obtained from Prof. Yan’s published folate–metal chirality work or CD host–guest literature. Six months are sufficient to complete the closed loop of “select 3 functional-group classes → dual-mapping comparison → simulations of 2–3 systems → juniper stress test → one targeted repair.”</p>
+<p><strong>Main risks and downgrade paths</strong>: If the CD host–guest inclusion free energy cannot converge in coarse-grained simulations within six months, downgrade the CD system to “mapping divergence and juniper inverse test only, without free-energy calculations,” retaining the most critical information-fidelity test in the closed loop; if the metal-coordination fragment cannot be parameterized in Martini 3 at all, replace it with “folate carboxyl protonation state” as a coarse-grained proxy for coordination ability, sacrificing metal specificity but retaining the core variable of “multiple-carboxyl spatial arrangement.”</p>
+
+<h2>5. Why This Version Is More “Yan Yun” Than the Original Plan</h2>
+<p>The original plan used a “metabolite–IDP” scenario. Although logically self-consistent, its interface with Prof. Yan’s actual work was indirect. This version inserts the “two legs” directly between <strong>the Martini tool she is using (SDS–SPMSA)</strong> and <strong>the scientific questions she is asking (interfacial-energy-driven assembly, coordination conformation determining chirality, host–guest recognition)</strong>, making the diagnostic function of ML tools serve a concrete supramolecular chemistry judgment: <strong>after coarse-graining to the bead level, is the noncovalent information driving self-assembly still sufficient?</strong> The answer, whether positive or negative, has direct operational significance for Prof. Yan’s team’s Martini-based SPMSA and host–guest simulations—“when is it trustworthy, and when is it not”—and pulls Martini’s ML tools out of the default context of “biomolecular coarse-graining” to be tested by <strong>coordination chemistry and supramolecular topology</strong>.</p>
+
+<h2>References</h2>
+<ol>
+  <li>Yan Yun, personal homepage, College of Chemistry and Molecular Engineering, Peking University, research directions and academic appointments.</li>
+  <li>Dou, X.; Jin, H.; Wu, T.; Huang, J.; Zhang, B.; Liu, Z.; Chen, T.; Yan, Y. <em>Physical Insight into the Conditions Required in the Solid-Phase Molecular Self-Assembly of SDS Revealed by Coarse-Grained Molecular Dynamics Simulation.</em> J. Phys. Chem. B <strong>2022</strong>. This work used the Martini force field for coarse-grained simulation of SDS SPMSA.</li>
+  <li>Prof. Yan Yun’s team review on solid-phase molecular self-assembly (SPMSA), <em>Nano Letters</em>; core mechanisms include interfacial-energy driving, trace-solvent assistance, and mechanical pressure overcoming barriers.</li>
+  <li>Prof. Yan Yun and Xiao Yunlong’s team, <em>ACS Materials Letters</em>, DFT mechanism of folate–Zn²⁺/Cu²⁺ chirality inversion, revealing how coordination conformation determines tetramer stacking direction.</li>
+  <li>Prof. Yan Yun’s team work on α-CD host–guest regulation of transient self-assembly, involving BPDC and Zn²⁺ coordination assembly kinetics.</li>
+</ol>
+
+</body>
+</html>
