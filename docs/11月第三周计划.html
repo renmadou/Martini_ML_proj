@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>Martini-ML 项目第3周5天工作细分计划（中文版）</title>
+<style>
+  @page { size: A4; margin: 20mm 18mm; }
+  body { font-family: "Noto Serif CJK SC","Source Han Serif SC","SimSun",serif;
+         font-size: 10.5pt; line-height: 1.65; color:#1a1a1a; max-width: 170mm; margin:auto; }
+  h1 { font-size: 17pt; border-bottom: 2px solid #333; padding-bottom: 6px; margin-top: 0; }
+  h2 { font-size: 13pt; margin-top: 1.6em; border-left: 4px solid #555; padding-left: 8px; }
+  h3 { font-size: 11pt; margin-top: 1.2em; color:#222; }
+  table { border-collapse: collapse; width: 100%; margin: 10px 0; font-size: 9.5pt; }
+  th, td { border: 1px solid #999; padding: 5px 7px; vertical-align: top; }
+  th { background: #eee; }
+  code { font-family: "Consolas","Courier New",monospace; background:#f3f3f3; padding:1px 4px; border-radius:3px; font-size:9pt; word-break: break-all; }
+  pre { background:#f7f7f7; border:1px solid #ddd; padding:10px; overflow-x:auto; font-size:9pt; line-height:1.45; }
+  blockquote { border-left: 3px solid #bbb; margin-left:0; padding-left:12px; color:#444; }
+  .day { background:#f7f7f7; border:1px solid #ccc; padding:8px 12px; margin:14px 0 8px 0; font-weight:bold; font-size:12pt; }
+  .check { background:#f3f8f3; border:1px solid #bcd6bc; padding:8px 12px; margin:8px 0; }
+  .warn { background:#fdf6e3; border:1px solid #e0c97f; padding:8px 12px; margin:10px 0; }
+  .note { background:#f0f4fa; border:1px solid #b8c9e0; padding:8px 12px; margin:10px 0; }
+  ul, ol { padding-left: 1.6em; }
+  li { margin: 3px 0; }
+</style>
+</head>
+<body>
+
+<h1>Martini-ML 项目第 3 周 5 天工作细分计划<br><span style="font-size:13pt;font-weight:normal;">——分子集冻结与工具支持状态扫描</span></h1>
+
+<blockquote>11 月第三周（总第 3 周）· 承接第 1 周的 <code>--no-xtb</code> 基线与 MolCluster 最小调用 · 目标：把第 2 周列出的“分子集假说”变成<strong>可执行、可追溯、已冻结的输入</strong>，并为第 4 周的 γ 校准划定可执行边界</blockquote>
+
+<p>本周的核心不是“把 5 个分子都跑通”，而是<strong>暴露每个分子在 Martini Mapper 与 MolCluster 两侧的支持状态</strong>，并把失败精确定位到官能团/碎片类型。第 2 周给出的“预期映射难点”是假说，本周的任务是用实际运行结果<strong>证实或证伪这些假说</strong>，而不是绕开失败去拼一个能跑的拓扑。</p>
+
+<h2>本周关键依据（承接前两周的技术约束）</h2>
+<ul>
+  <li><strong>全程使用 <code>--no-xtb</code></strong>：第 1 周已确认该模式跳过 xTB 坐标生成与键参数精修，只保留规则映射阶段。本周关注的是<strong>碎片字典对目标官能团的覆盖</strong>，不是坐标质量，也不是力场参数的最终质量。</li>
+  <li><strong>Martini Mapper 的化学覆盖边界</strong>：其内部映射字典主要围绕 C、O、N 开发，对 S、P 与卤素的支持仍属实验性。本周分子集不含 S/P/卤素，但<strong>稠合杂环（蝶呤环）与环状寡糖（α-CD）</strong>属于字典覆盖的薄弱区，必须实测而非推断。</li>
+  <li><strong>MolCluster 的分辨率机制</strong>：γ 通过二分搜索逼近目标分组数，预定义基团对损失用于保护羧基等目标基团不被拆分或错误合并。<strong>本周不调 γ</strong>，只确认分子图能否构建、前向传播能否返回分组、保护项是否覆盖目标官能团——γ 校准留给第 4 周。</li>
+  <li><strong>第 1 周的环境快照</strong>（<code>env_martini_mapper.txt</code>、<code>env_molcluster.txt</code>）本周继续沿用，<strong>不新建环境</strong>，以保证与基线测试的可比性。</li>
+</ul>
+
+<div class="day">周一：SMILES 来源决策与标准化</div>
+
+<p><strong>核心目标</strong>：为每个目标分子锁定<strong>唯一且可追溯的 SMILES 来源</strong>，消除“同一分子在不同数据库给出不同互变异构体/质子化态”带来的后续对比噪声。</p>
+
+<p><strong>操作</strong>：按下表逐一获取并记录，<strong>禁止凭结构描述手动重建 SMILES</strong>（尤其是 α-CD 这类含数十个手性中心的环状寡糖，手写几乎必然出错且难以自查）。</p>
+
+<table>
+  <tr><th>分子</th><th>来源</th><th>SMILES 处理方式</th><th>本周特别核对项</th></tr>
+  <tr>
+    <td><strong>叶酸</strong></td>
+    <td>PubChem，CID 6037（操作时现场确认 CID 未变）</td>
+    <td>直接复制 canonical SMILES：<br><code>C1=CC(=CC=C1C(=O)NC(CCC(=O)O)C(=O)O)NCC2=CN=C3C(=N2)C(=O)N=C(N3)N</code></td>
+    <td>蝶呤环的<strong>酮式/烯醇式互变异构</strong>必须固定为 PubChem 给出的 canonical 形式；记录“不探索互变异构体空间”</td>
+  </tr>
+  <tr>
+    <td><strong>BPDC</strong>（4,4'-联苯二甲酸）</td>
+    <td>PubChem / 供应商结构页，记录实际采用的 CID 或批号</td>
+    <td>直接复制：<br><code>OC(=O)c1ccc(cc1)-c2ccc(cc2)C(O)=O</code></td>
+    <td><strong>必须与阎云团队工作中实际使用的 BPDC 结构核对</strong>（是 4,4'-联苯二甲酸还是其他异构体/取代形式），以文献结构图为准</td>
+  </tr>
+  <tr>
+    <td><strong>α-CD</strong></td>
+    <td>PubChem 检索 “alpha-cyclodextrin”，<strong>记录实际 CID</strong></td>
+    <td><strong>直接从 PubChem 页面复制 canonical SMILES</strong>，不手动输入、不凭记忆重建</td>
+    <td>逐位核对手性标记（<code>@</code>/<code>@@</code>）数量与 6 个葡萄糖单元的预期一致；记录分子式与原子总数，作为后续分子图规模的输入</td>
+  </tr>
+  <tr>
+    <td><strong>Folate–M²⁺ 片段</strong></td>
+    <td>由叶酸 SMILES 派生</td>
+    <td><strong>不生成独立 SMILES</strong>：金属离子不进入 SMILES（Martini 3 无标准金属珠子）</td>
+    <td>本周只定义“哪些原子属于配位相关子结构”（羧基碳/氧、相邻氮），配位信息留到第 6 周简化层级测试处理</td>
+  </tr>
+</table>
+
+<div class="check"><strong>完成标志</strong>：<code>molecule_set_SMILES.csv</code> 定稿，每行包含：分子名、SMILES、来源（URL/CID/批号）、<strong>质子化态与互变异构体声明</strong>、原子总数、重原子数。α-CD 一行必须注明“从 PubChem 复制，手性标记已核对”。</div>
+
+<div class="day">周二：Martini Mapper 官能团支持预检——逐分子扫描，不追求跑通</div>
+
+<p><strong>核心目标</strong>：在周三正式运行之前，先判断每个分子<strong>是否落在 Martini Mapper 的能力边界内</strong>，并把失败定位到具体官能团或碎片类型。</p>
+
+<p><strong>操作</strong>：对每个分子运行 <code>--no-xtb</code> 模式，记录三类结果之一：<strong>直接成功</strong>、<strong>部分失败（某些官能团无法映射）</strong>、<strong>完全失败</strong>。对部分失败，必须精确记录<strong>触发失败的碎片类型或官能团</strong>，例如“蝶呤环的 C=N 片段无匹配珠子”“糖苷氧被拆分为非标准珠子”“羧基未被赋予标准羧酸珠子类型”。</p>
+
+<p>本周的四个分子各有明确的观察靶点：</p>
+<ul>
+  <li><strong>叶酸</strong>：蝶呤环是<strong>芳香性稠合双环、含多个氮与羰基</strong>，Martini Mapper 的“most-constrained-first”策略会优先处理刚性环系，但稠合杂环是否被拆成多个碎片、拆分后是否仍保持环系完整性，是本周最关键的观察点。谷氨酸尾的两个羧基是否被<strong>合并为单一负电珠子</strong>（第 2 周的核心假说）在此阶段即可初见端倪。</li>
+  <li><strong>α-CD</strong>：纯碳水化合物，Martini 3 有系统的碳水化合物参数化并采用<strong>片段化构建块策略</strong>，但 α-CD 的<strong>环状闭合拓扑</strong>是否被现有碎片方案覆盖（还是被当作开链寡糖处理）是本周要暴露的关键问题。糖苷氧的归属直接决定第 5 周分歧表的条目。</li>
+  <li><strong>BPDC</strong>：联苯骨架 + 两个羧酸，预期在覆盖范围内，作为<strong>阴性对照</strong>运行——若它也失败，说明本周的运行环境或参数调用有问题，而非化学覆盖问题。</li>
+  <li><strong>Folate–M²⁺ 片段</strong>：本周不作为独立输入运行，仅在第 6 周拆解时使用。</li>
+</ul>
+
+<div class="check"><strong>完成标志</strong>：<code>Mapper_precheck_log.md</code>，逐分子标注支持状态、失败定位到碎片类型、以及“是否属于工具能力边界”的初步判断（区分“字典未覆盖”与“该化学信息在珠子层面本身不可表达”）。</div>
+
+<div class="day">周三：分子集正式 Martini Mapper 基线运行（<code>--no-xtb</code>）</div>
+
+<p><strong>核心目标</strong>：在周二预检基础上，对<strong>所有能运行的分子</strong>生成正式输出（<code>.itp</code> / <code>.gro</code> / <code>.txt</code>），作为第 5 周“规则驱动侧”的基线数据。</p>
+
+<p><strong>操作</strong>：对每个分子记录两项核心数据：<strong>珠子总数/重原子数之比</strong>（粗粒化程度）与<strong>每个关注官能团的珠子归属</strong>（珠子类型 + 该珠子包含哪些原子）。</p>
+
+<p>按 Martini 3 的小分子珠子字典，羧酸通常对应极性珠子、芳香环倾向于 C5/TC5 类、脂肪环倾向于 S 型珠子——但<strong>本周不预设“应该是什么”</strong>，而是以实际输出为准，把“实际珠子类型”与“理论预期”的差异本身作为记录项。叶酸蝶呤环被映射为多个 T 型珠子还是一个 C5/S 型组合，α-CD 的环上氧是否作为独立珠子、羟基是否被合并或省略，这些都必须由输出文件说话。</p>
+
+<p><strong>与第 1 周基线的一致性检查</strong>：使用第 1 周保存的环境快照，<strong>不升级依赖</strong>；若某分子的输出格式与苯的基线样例存在结构差异（例如多出未预期的键或角参数），记录差异而非忽略。</p>
+
+<div class="check"><strong>完成标志</strong>：每个成功分子的 <code>.itp</code>/<code>.gro</code>/<code>.txt</code> 归档到 <code>outputs/week3_mapper/</code>；<code>Mapper_baseline_summary.csv</code>，列包括分子名、珠子数、重原子数、珠子/原子比、每个关注官能团的珠子类型与原子组成、与理论预期的差异说明。</div>
+
+<div class="day">周四：MolCluster 输入适配——从 SMILES 到分子图</div>
+
+<p><strong>核心目标</strong>：确认 MolCluster 的推理入口能接受周三使用的<strong>同一批 SMILES</strong>，不引入额外的分子表示转换噪声。第 1 周已在苯上跑通最小调用，本周扩展到复杂分子集。</p>
+
+<p><strong>操作</strong>：逐分子检查四项：</p>
+<ol>
+  <li><strong>分子图能否构建</strong>：芳香性 SMILES、环状拓扑是否被正常解析；α-CD 的 30 元大环是极端测试。</li>
+  <li><strong>前向传播能否返回分组</strong>：是否因分子图过大出现显存不足或截断；记录原子数与边数作为规模指标。</li>
+  <li><strong>预定义基团对损失是否覆盖目标官能团</strong>：是否内置羧基、糖苷氧、蝶呤环的保护项；<strong>若没有，记录为“需要手动扩展的缺失”</strong>，不在本周擅自修改损失函数。</li>
+  <li><strong>输出可读性</strong>：分组结果能否明确对应到原子索引，以便第 5 周做逐原子归属对比。</li>
+</ol>
+
+<p><strong>遇到崩溃不调参硬跑</strong>：记录崩溃点、分子图规模、以及报错类型（显存 / 图解析 / 算子不支持），作为第 4 周 γ 校准的输入约束。</p>
+
+<div class="check"><strong>完成标志</strong>：<code>MolCluster_compatibility_log.md</code>，含分子 × 分子图构建 × 前向传播 × 保护项覆盖 × 输出可读性的矩阵，以及每个崩溃点的报错原文与规模数据。</div>
+
+<div class="day">周五：分子集冻结与第 3 周出口检查</div>
+
+<p><strong>核心目标</strong>：把前四天的 SMILES、预检、基线输出、输入适配整合为<strong>第 4 周可以直接接手的冻结分子集</strong>，并撰写《第 3 周分子集冻结备忘录》。</p>
+
+<p><strong>备忘录最低限度包含四部分</strong>：</p>
+<ol>
+  <li><strong>每个分子的最终 SMILES 与质子化态/互变异构体声明</strong>，以及选择该来源的理由（为什么是这个 CID、是否与文献结构核对过）。</li>
+  <li><strong>Martini Mapper 支持状态矩阵</strong>：分子 × 关注官能团 × 支持/部分/失败，失败定位到碎片类型，并标注“字典未覆盖”还是“珠子层面不可表达”。</li>
+  <li><strong>MolCluster 输入兼容性矩阵</strong>：分子 × 图构建 × 前向传播 × 保护项覆盖，标注崩溃/截断及其规模原因。</li>
+  <li><strong>第 4 周 γ 校准的输入约束</strong>：哪些分子可正常进入 γ 二分搜索；哪些降级为“仅记录映射分歧，不进入可比分辨率对比”，并写明降级理由。</li>
+</ol>
+
+<div class="check"><strong>完成标志</strong>：<code>molecule_set_SMILES.csv</code> 定稿 + <code>Mapper_precheck_log.md</code> + <code>Mapper_baseline_summary.csv</code> + <code>MolCluster_compatibility_log.md</code> + 《第 3 周分子集冻结备忘录》。此后第 4 周的 γ 校准<strong>不再回头修改分子集</strong>，所有调整只能以“在已冻结分子集上的参数校准”形式进行。</div>
+
+<div class="note"><strong>本周产出清单</strong>：
+<ul>
+  <li><code>molecule_set_SMILES.csv</code>（冻结版，含来源与互变异构体声明）</li>
+  <li><code>Mapper_precheck_log.md</code>（支持状态与失败定位）</li>
+  <li><code>outputs/week3_mapper/</code>（各分子 <code>.itp</code>/<code>.gro</code>/<code>.txt</code>）</li>
+  <li><code>Mapper_baseline_summary.csv</code>（珠子数/原子数/官能团归属/预期差异）</li>
+  <li><code>MolCluster_compatibility_log.md</code>（图构建/前向传播/保护项/规模）</li>
+  <li>《第 3 周分子集冻结备忘录》</li>
+</ul>
+</div>
+
+<h2>与第 4 周的交接关系</h2>
+<table>
+  <tr><th>第 3 周产出</th><th>在第 4 周的角色</th></tr>
+  <tr><td><code>Mapper_baseline_summary.csv</code> 中的珠子/原子比</td><td>作为 MolCluster 设定目标粗粒化比 <code>r_target</code> 的<strong>直接参照</strong>，保证两种映射在可比分辨率下对比</td></tr>
+  <tr><td><code>MolCluster_compatibility_log.md</code> 中的崩溃/截断记录</td><td>决定第 4 周哪些分子可进入 γ 二分搜索、哪些需降级</td></tr>
+  <tr><td>备忘录中的“字典未覆盖”条目</td><td>直接进入第 5 周分歧表的第一批候选条目</td></tr>
+  <tr><td>冻结的 <code>molecule_set_SMILES.csv</code></td><td>第 4 周<strong>不再变动</strong>；任何新增分子必须单独记录为“第 4 周后增补”，不混入主对比</td></tr>
+</table>
+
+<div class="warn"><strong>第 3 周的硬性边界</strong>：
+<ul>
+  <li>如果 MolCluster 在 α-CD 的大环上完全无法构建分子图，<strong>周四不修复</strong>；周五在备忘录中标记为“MolCluster 域偏移的极端案例”，第 4 周 γ 校准仅对叶酸与 BPDC 执行，α-CD 在 MolCluster 侧降级为“仅记录 Mapper 行为”。</li>
+  <li>如果 Martini Mapper 在蝶呤环上直接失败，<strong>不手动拼接碎片强行生成拓扑</strong>。失败本身就是第 5 周分歧表的条目；强行修复会掩盖“工具能力边界”与“化学信息本身不可映射”之间的区别。</li>
+  <li>第 3 周允许“某些分子在某一侧不可用”，<strong>不允许“为了跑通而模糊失败的类型和位置”</strong>。本周结束时，任何一个失败都必须能被一句话说清：在哪个分子的哪个官能团上、以什么形式失败、属于哪一类原因。</li>
+</ul>
+</div>
+
+</body>
+</html>
