@@ -3,3 +3,6 @@ __pycache__/
 *.egg-info/
 benchmarks/mapper_outputs/
 /tmp/
+docs/conference_abstract.docx
+docs/conference_abstract_EN.docx
+*.html
