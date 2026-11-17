@@ -1,0 +1,4 @@
+分子名,SMILES,输出目录,环境快照哈希(envs/env_martini_mapper.txt),核对人,核对时间
+Folate,C1=CC(=CC=C1C(=O)N[C@@H](CCC(=O)O)C(=O)O)NCC2=CN=C3C(=N2)C(=O)N=C(N3)N,benchmarks/week3_mapper/（Folate 无输出，失败记录在案）,1dd7565fa5a22512,kimi（自动核对）,2026-11-17 16:33 +0800
+BPDC,C1=CC(=CC=C1C2=CC=C(C=C2)C(=O)O)C(=O)O,"benchmarks/week3_mapper/BPDC.{itp,gro,txt}",1dd7565fa5a22512,kimi（自动核对）,2026-11-17 16:33 +0800
+alpha-CD,C([C@@H]1[C@@H]2[C@@H]([C@H]([C@H](O1)O[C@@H]3[C@H](O[C@@H]([C@@H]([C@H]3O)O)O[C@@H]4[C@H](O[C@@H]([C@@H]([C@H]4O)O)O[C@@H]5[C@H](O[C@@H]([C@@H]([C@H]5O)O)O[C@@H]6[C@H](O[C@@H]([C@@H]([C@H]6O)O)O[C@@H]7[C@H](O[C@H](O2)[C@@H]([C@H]7O)O)CO)CO)CO)CO)CO)O)O)O,"benchmarks/week3_mapper/alpha-CD.{itp,gro,txt}",1dd7565fa5a22512,kimi（自动核对）,2026-11-17 16:33 +0800

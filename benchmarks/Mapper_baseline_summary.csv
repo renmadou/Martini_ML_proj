@@ -1,5 +1,5 @@
-分子名,状态,珠子数,重原子数,珠子/原子比,关注官能团的珠子归属（珠子类型[原子组成]）,与理论预期的差异说明,输出归档
-BPDC,成功,8,18,2.25,"苯环×2: 各3×TC5(C,C) 每环归属{0,1}{2,3}{4,5}与{6,7}{8,9}{10,11}; 羧基×2: 各1×SP2(C,O,O) {12,13,14}与{15,16,17}","羧酸→极性SP2、苯环→TC5均符合Martini 3预期; 两个羧基各自独立成珠未合并——对叶酸双羧基合并假说构成负面先验",benchmarks/week3_mapper/BPDC.{txt,gro,itp}
-alpha-CD,成功(需人工复核),24,66,2.75,"CH2OH×6: TP1(C,O); 糖苷/环氧+碳配对: 6×TN4a(C,O); 葡萄糖骨架: 7×SP4(C,C,O,O); 4×SN6(C,C,O); 异常: 1×TC3(C,C) 原子{44,45}=某葡萄糖单元C4/C5环碳对","Martini 3原生碳水化合物为每葡萄糖3 beads(共18), Mapper给24 beads(每葡萄糖4) 过度细分; 糖苷氧与碳配对成TN4a而非独立归属; TC3用于糖骨架化学上可疑; 环状闭合拓扑被正确保留",benchmarks/week3_mapper/alpha-CD.{txt,gro,itp}
-Folate,完全失败,-,32,-,无输出,"两处独立硬伤: ①蝶呤嘧啶酮环(鸟嘌呤样内酰胺C=O/NH2在芳香稠环无匹配珠子, 报'mapping section 2 failed: Benzene ring section not fully mappable!'); ②谷氨酸尾(α-氨基酸+远端第二羧基的支化非环碎片无法分配, 报'Non-ring section division leads to unassignable sections'); 均判定为字典/算法未覆盖, 非珠子层面不可表达; 详见docs/Mapper_precheck_log.md",无
-Folate-M2+-fragment,本周不运行,-,-,-,-,按计划留至第6周配位简化层级测试,-
+分子名,状态,珠子数,重原子数,珠子/原子比,关注官能团的珠子归属（珠子类型[原子组成]）,与理论预期的差异说明,输出归档,
+BPDC,成功,8,18,2.25,"苯环×2: 各3×TC5(C,C) 每环归属{0,1}{2,3}{4,5}与{6,7}{8,9}{10,11}; 羧基×2: 各1×SP2(C,O,O) {12,13,14}与{15,16,17}",羧酸→极性SP2、苯环→TC5均符合Martini 3预期; 两个羧基各自独立成珠未合并——对叶酸双羧基合并假说构成负面先验,benchmarks/week3_mapper/BPDC.{txt,"['gro', 'itp}']"
+alpha-CD,成功(TC3归属经人工复核不予接受),24,66,2.75,"CH2OH×6: TP1(C,O); 糖苷/环氧+碳配对: 6×TN4a(C,O); 葡萄糖骨架: 7×SP4(C,C,O,O); 4×SN6(C,C,O); 异常: 1×TC3(C,C) 原子{44,45}=某葡萄糖单元C4/C5环碳对","Martini 3原生碳水化合物为每葡萄糖3 beads(共18), Mapper给24 beads(每葡萄糖4) 过度细分; 糖苷氧与碳配对成TN4a而非独立归属; TC3(C,C)原子{44,45}经RDKit复核为末位葡萄糖单元的环碳对(44=环C连接环O43与C50, 45=环C连接环O46与C53), 二者各带羟基却落入非极性微珠TC3——极性化学错误, 系大环闭合点(糖苷键O48→C2)处碎片不对称导致; 判定为人工干预点/M1候选条目, 不予接受; 环状闭合拓扑被正确保留",benchmarks/week3_mapper/alpha-CD.{txt,"['gro', 'itp}']"
+Folate,完全失败,-,32,-,无输出,"两处独立硬伤: ①蝶呤嘧啶酮环(鸟嘌呤样内酰胺C=O/NH2在芳香稠环无匹配珠子, 报'mapping section 2 failed: Benzene ring section not fully mappable!'); ②谷氨酸尾(α-氨基酸+远端第二羧基的支化非环碎片无法分配, 报'Non-ring section division leads to unassignable sections'); 均判定为字典/算法未覆盖, 非珠子层面不可表达; 详见docs/Mapper_precheck_log.md",无,
+Folate-M2+-fragment,本周不运行,-,-,-,-,按计划留至第6周配位简化层级测试,-,
