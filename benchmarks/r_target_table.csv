@@ -1,0 +1,4 @@
+分子名,Mapper珠子数,重原子数,Mapper r (N_groups/N_atoms),MolCluster r_target,N_target,偏差说明
+BPDC,8,18,0.4444,0.4444,8,无偏差——Mapper 成功，r_target 直接取 Mapper 实际粗粒化比
+alpha-CD,24,66,0.3636,0.3636,24,无数值偏差；注意 Mapper 侧 TC3 归属已被判不可接受，N_target=24 仅对齐 Mapper 分辨率，不代表化学正确性
+Folate,-,32,-,-,-,无 Mapper 参照（字典未覆盖蝶呤环/谷氨酸尾）→ 降级为 MolCluster-only：自由 γ 扫描 + 保护项偏离度，不进入可比分辨率对比
